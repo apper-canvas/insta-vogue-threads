@@ -50,8 +50,8 @@ class CartService {
         data: cartItems
       };
 
-    } catch (error) {
-      console.error("Error fetching cart items:", error?.response?.data?.message || error);
+} catch (error) {
+      console.error("Error fetching cart items:", error?.response?.data?.message || error?.message || error);
       return { success: false, error: "Failed to load cart" };
     }
   }
@@ -102,8 +102,8 @@ class CartService {
         return this.getCart();
       }
 
-    } catch (error) {
-      console.error("Error adding to cart:", error?.response?.data?.message || error);
+} catch (error) {
+      console.error("Error adding to cart:", error?.response?.data?.message || error?.message || error);
       return { success: false, error: "Failed to add item to cart" };
     }
   }
@@ -136,8 +136,8 @@ class CartService {
 
       return this.getCart();
 
-    } catch (error) {
-      console.error("Error updating cart item:", error?.response?.data?.message || error);
+} catch (error) {
+      console.error("Error updating cart item:", error?.response?.data?.message || error?.message || error);
       return { success: false, error: "Failed to update cart item" };
     }
   }
@@ -163,8 +163,8 @@ class CartService {
 
       return this.getCart();
 
-    } catch (error) {
-      console.error("Error removing cart item:", error?.response?.data?.message || error);
+} catch (error) {
+      console.error("Error removing cart item:", error?.response?.data?.message || error?.message || error);
       return { success: false, error: "Failed to remove cart item" };
     }
   }
@@ -201,8 +201,8 @@ class CartService {
         data: []
       };
 
-    } catch (error) {
-      console.error("Error clearing cart:", error?.response?.data?.message || error);
+} catch (error) {
+      console.error("Error clearing cart:", error?.response?.data?.message || error?.message || error);
       return { success: false, error: "Failed to clear cart" };
     }
   }
@@ -221,8 +221,8 @@ class CartService {
         data: total
       };
 
-    } catch (error) {
-      console.error("Error calculating cart total:", error?.response?.data?.message || error);
+} catch (error) {
+      console.error("Error calculating cart total:", error?.response?.data?.message || error?.message || error);
       return { success: false, error: "Failed to calculate total" };
     }
   }
@@ -241,8 +241,8 @@ class CartService {
         data: count
       };
 
-    } catch (error) {
-      console.error("Error getting cart item count:", error?.response?.data?.message || error);
+} catch (error) {
+      console.error("Error getting cart item count:", error?.response?.data?.message || error?.message || error);
       return { success: false, error: "Failed to get item count" };
     }
   }

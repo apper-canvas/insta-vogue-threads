@@ -136,11 +136,9 @@ const CartSidebar = ({ isOpen, onClose, className = "" }) => {
               <div className="p-6 space-y-4">
                 {cartItems.map((item) => (
                   <div key={item.id} className="flex space-x-3 bg-gray-50 p-3 rounded-lg">
-                    <img
-                      src={`https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=100&h=100&fit=crop`}
-                      alt={item.productName}
-                      className="w-16 h-16 object-cover rounded"
-                    />
+<div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
+                      <ApperIcon name="Package" className="w-6 h-6 text-gray-400" />
+                    </div>
                     
                     <div className="flex-1 space-y-1">
                       <h4 className="font-medium text-sm text-primary line-clamp-1">
