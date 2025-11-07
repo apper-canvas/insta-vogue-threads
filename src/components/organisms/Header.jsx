@@ -96,7 +96,7 @@ const loadWishlistCount = async () => {
                 <ApperIcon name="Sparkles" className="w-5 h-5 text-white" />
               </div>
               <span className="font-display text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Vogue Threads
+Fashion Market
               </span>
             </Link>
 
