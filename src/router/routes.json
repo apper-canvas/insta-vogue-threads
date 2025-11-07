@@ -10,6 +10,18 @@
         ]
       }
     }
+},
+  "/about": {
+    "allow": {
+      "when": {
+        "conditions": [
+          {
+            "label": "About page is public",
+            "rule": "public"
+          }
+        ]
+      }
+    }
   },
   "/products": {
     "allow": {

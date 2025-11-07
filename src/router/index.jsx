@@ -6,6 +6,7 @@ import Layout from "@/components/organisms/Layout";
 
 // Lazy load page components
 const Home = lazy(() => import("@/components/pages/Home"));
+const About = lazy(() => import("@/components/pages/About"));
 const Products = lazy(() => import("@/components/pages/Products"));
 const ProductDetail = lazy(() => import("@/components/pages/ProductDetail"));
 const Checkout = lazy(() => import("@/components/pages/Checkout"));
@@ -72,6 +73,10 @@ const mainRoutes = [
   createRoute({
     index: true,
     element: <Home />
+  }),
+createRoute({
+    path: "about",
+    element: <About />
   }),
   createRoute({
     path: "products",
