@@ -1,5 +1,7 @@
-import React, { lazy, Suspense } from "react";
+import React, { Suspense, lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
+import { getRouteConfig } from "@/router/route.utils";
+import Root from "@/layouts/Root";
 import Layout from "@/components/organisms/Layout";
 
 // Lazy load page components
@@ -11,6 +13,13 @@ const OrderConfirmation = lazy(() => import("@/components/pages/OrderConfirmatio
 const UserProfile = lazy(() => import("@/components/pages/UserProfile"));
 const Wishlist = lazy(() => import("@/components/pages/Wishlist"));
 const NotFound = lazy(() => import("@/components/pages/NotFound"));
+const Login = lazy(() => import("@/components/pages/Login"));
+const Signup = lazy(() => import("@/components/pages/Signup"));
+const Callback = lazy(() => import("@/components/pages/Callback"));
+const ErrorPage = lazy(() => import("@/components/pages/ErrorPage"));
+const ResetPassword = lazy(() => import("@/components/pages/ResetPassword"));
+const PromptPassword = lazy(() => import("@/components/pages/PromptPassword"));
+
 // Loading component for Suspense fallback
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -23,81 +32,117 @@ const PageLoader = () => (
   </div>
 );
 
-// Define main routes
-const mainRoutes = [
-  {
-    path: "",
-    index: true,
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <Home />
-      </Suspense>
-    )
-  },
-  {
-    path: "products",
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <Products />
-      </Suspense>
-    )
-  },
-  {
-    path: "product/:id",
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <ProductDetail />
-      </Suspense>
-    )
-  },
-  {
-    path: "checkout",
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <Checkout />
-      </Suspense>
-    )
-  },
-{
-    path: "order-confirmation",
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <OrderConfirmation />
-      </Suspense>
-    )
-  },
-  {
-    path: "profile",
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <UserProfile />
-      </Suspense>
-    )
-},
-{
-    path: "wishlist",
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <Wishlist />
-      </Suspense>
-    )
-  },
-  {
-    path: "*",
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <NotFound />
-      </Suspense>
-    )
+// Helper function to create routes with Suspense and access configuration
+const createRoute = ({
+  path,
+  index,
+  element,
+  access,
+  children,
+  ...meta
+}) => {
+  // Get config for this route
+  let configPath;
+  if (index) {
+    configPath = "/";
+  } else {
+    configPath = path.startsWith('/') ? path : `/${path}`;
   }
+
+  const config = getRouteConfig(configPath);
+  const finalAccess = access || config?.allow;
+
+  const route = {
+    ...(index ? { index: true } : { path }),
+element: element ? <Suspense fallback={<PageLoader />}>{element}</Suspense> : element,
+    handle: {
+      access: finalAccess,
+      ...meta,
+    },
+  };
+
+  if (children && children.length > 0) {
+    route.children = children;
+  }
+
+  return route;
+};
+
+const mainRoutes = [
+  createRoute({
+    index: true,
+    element: <Home />
+  }),
+  createRoute({
+    path: "products",
+    element: <Products />
+  }),
+  createRoute({
+    path: "product/:id",
+    element: <ProductDetail />
+  }),
+  createRoute({
+    path: "checkout",
+    element: <Checkout />
+  }),
+  createRoute({
+    path: "order-confirmation",
+    element: <OrderConfirmation />
+  }),
+  createRoute({
+    path: "profile",
+    element: <UserProfile />
+  }),
+  createRoute({
+    path: "wishlist",
+    element: <Wishlist />
+  }),
+  createRoute({
+    path: "*",
+    element: <NotFound />
+  })
+];
+
+const authRoutes = [
+  createRoute({
+    path: "login",
+    element: <Login />
+  }),
+  createRoute({
+    path: "signup",
+    element: <Signup />
+  }),
+  createRoute({
+    path: "callback",
+    element: <Callback />
+  }),
+  createRoute({
+    path: "error",
+    element: <ErrorPage />
+  }),
+  createRoute({
+    path: "reset-password/:appId/:fields",
+    element: <ResetPassword />
+  }),
+  createRoute({
+    path: "prompt-password/:appId/:emailAddress/:provider",
+    element: <PromptPassword />
+  })
 ];
 
 // Create routes array
 const routes = [
   {
     path: "/",
-    element: <Layout />,
-    children: [...mainRoutes]
+    element: <Root />,
+    children: [
+      {
+        path: "/",
+        element: <Layout />,
+        children: [...mainRoutes]
+      },
+      ...authRoutes
+    ]
   }
 ];
 

@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { wishlistService } from "@/services/api/wishlistService";
 import productsService from "@/services/api/productsService";
 import cartService from "@/services/api/cartService";
-import { wishlistService } from "@/services/api/wishlistService";
 import ApperIcon from "@/components/ApperIcon";
+import Wishlist from "@/components/pages/Wishlist";
 import CartIcon from "@/components/molecules/CartIcon";
 import CategoryDropdown from "@/components/molecules/CategoryDropdown";
 import SearchBar from "@/components/molecules/SearchBar";
+import LogoutButton from "@/components/molecules/LogoutButton";
 const Header = ({ onCartClick }) => {
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
@@ -108,6 +110,7 @@ const Header = ({ onCartClick }) => {
             </div>
 {/* Right Section */}
 <div className="flex items-center space-x-4">
+              <LogoutButton />
               {/* User Profile Link */}
               <Link
                 to="/profile"
@@ -194,7 +197,10 @@ const Header = ({ onCartClick }) => {
                   >
                     {item.name}
                   </Link>
-))}
+                ))}
+                <div className="pt-2">
+                  <LogoutButton />
+                </div>
               </div>
             </nav>
           </div>

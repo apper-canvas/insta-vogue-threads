@@ -1,84 +1,197 @@
-const WISHLIST_KEY = 'vogue-threads-wishlist';
-
-// Simulate API delay for realistic user experience
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+import { getApperClient } from '@/services/apperClient';
+import { toast } from 'react-toastify';
 
 const wishlistService = {
+  tableName: 'wishlist_item_c',
+
   // Get all wishlist items (returns array of product IDs)
   async getAll() {
-    await delay(100);
     try {
-      const stored = localStorage.getItem(WISHLIST_KEY);
-      return stored ? JSON.parse(stored) : [];
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        console.error("ApperClient not available");
+        return [];
+      }
+
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "product_id_c"}}
+        ],
+        orderBy: [{"fieldName": "Id", "sorttype": "DESC"}],
+        pagingInfo: {"limit": 100, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(this.tableName, params);
+
+      if (!response.success) {
+        console.error("Failed to fetch wishlist items:", response.message);
+        return [];
+      }
+
+      return (response.data || []).map(item => item.product_id_c);
+
     } catch (error) {
-      console.error('Error retrieving wishlist:', error);
+      console.error('Error retrieving wishlist:', error?.response?.data?.message || error);
       return [];
     }
   },
 
   // Add item to wishlist
   async add(productId) {
-    await delay(150);
     try {
+      // Check if item already exists
       const current = await this.getAll();
-      if (!current.includes(productId)) {
-        const updated = [...current, productId];
-        localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated));
-        return true;
+      if (current.includes(productId)) {
+        return false; // Item already in wishlist
       }
-      return false; // Item already in wishlist
+
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        console.error("ApperClient not available");
+        throw new Error('Service unavailable');
+      }
+
+      const params = {
+        records: [{
+          product_id_c: productId
+        }]
+      };
+
+      const response = await apperClient.createRecord(this.tableName, params);
+
+      if (!response.success) {
+        console.error("Failed to add item to wishlist:", response.message);
+        throw new Error('Failed to add item to wishlist');
+      }
+
+      return true;
+
     } catch (error) {
-      console.error('Error adding to wishlist:', error);
+      console.error('Error adding to wishlist:', error?.response?.data?.message || error);
       throw new Error('Failed to add item to wishlist');
     }
   },
 
   // Remove item from wishlist
   async remove(productId) {
-    await delay(150);
     try {
-      const current = await this.getAll();
-      const updated = current.filter(id => id !== productId);
-      localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated));
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        console.error("ApperClient not available");
+        throw new Error('Service unavailable');
+      }
+
+      // First find the wishlist item with this product ID
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "product_id_c"}}
+        ],
+        where: [{
+          "FieldName": "product_id_c",
+          "Operator": "EqualTo",
+          "Values": [productId],
+          "Include": true
+        }],
+        pagingInfo: {"limit": 1, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(this.tableName, params);
+
+      if (!response.success || !response.data || response.data.length === 0) {
+        console.error("Wishlist item not found for product:", productId);
+        return false;
+      }
+
+      const wishlistItem = response.data[0];
+      
+      const deleteParams = {
+        RecordIds: [wishlistItem.Id]
+      };
+
+      const deleteResponse = await apperClient.deleteRecord(this.tableName, deleteParams);
+
+      if (!deleteResponse.success) {
+        console.error("Failed to remove item from wishlist:", deleteResponse.message);
+        throw new Error('Failed to remove item from wishlist');
+      }
+
       return true;
+
     } catch (error) {
-      console.error('Error removing from wishlist:', error);
+      console.error('Error removing from wishlist:', error?.response?.data?.message || error);
       throw new Error('Failed to remove item from wishlist');
     }
   },
 
   // Check if item is in wishlist
   async isInWishlist(productId) {
-    await delay(50);
     try {
       const current = await this.getAll();
       return current.includes(productId);
     } catch (error) {
-      console.error('Error checking wishlist:', error);
+      console.error('Error checking wishlist:', error?.response?.data?.message || error);
       return false;
     }
   },
 
   // Clear entire wishlist
   async clear() {
-    await delay(100);
     try {
-      localStorage.removeItem(WISHLIST_KEY);
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        console.error("ApperClient not available");
+        throw new Error('Service unavailable');
+      }
+
+      // Get all wishlist items first
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}}
+        ],
+        pagingInfo: {"limit": 100, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(this.tableName, params);
+
+      if (!response.success) {
+        console.error("Failed to fetch wishlist items for clearing:", response.message);
+        throw new Error('Failed to clear wishlist');
+      }
+
+      if (!response.data || response.data.length === 0) {
+        return true; // Already empty
+      }
+
+      const itemIds = response.data.map(item => item.Id);
+      
+      const deleteParams = {
+        RecordIds: itemIds
+      };
+
+      const deleteResponse = await apperClient.deleteRecord(this.tableName, deleteParams);
+
+      if (!deleteResponse.success) {
+        console.error("Failed to clear wishlist:", deleteResponse.message);
+        throw new Error('Failed to clear wishlist');
+      }
+
       return true;
+
     } catch (error) {
-      console.error('Error clearing wishlist:', error);
+      console.error('Error clearing wishlist:', error?.response?.data?.message || error);
       throw new Error('Failed to clear wishlist');
     }
   },
 
   // Get wishlist count
   async getCount() {
-    await delay(50);
     try {
       const items = await this.getAll();
       return items.length;
     } catch (error) {
-      console.error('Error getting wishlist count:', error);
+      console.error('Error getting wishlist count:', error?.response?.data?.message || error);
       return 0;
     }
   }
