@@ -10,12 +10,12 @@ export default {
         'display': ['Playfair Display', 'serif'],
         'sans': ['Inter', 'sans-serif'],
       },
-      colors: {
-        primary: '#1a1a1a',
-        secondary: '#f5f5f5',
-        accent: '#d4af37',
-        surface: '#ffffff',
-        background: '#fafafa',
+colors: {
+        primary: '#1e40af',      // Deep blue
+        secondary: '#f1f5f9',    // Light blue-gray
+        accent: '#3b82f6',       // Bright blue
+        surface: '#ffffff',      // Clean white
+        background: '#f8fafc',   // Very light blue-gray
       },
       animation: {
         'bounce-subtle': 'bounce-subtle 0.6s ease-out',
