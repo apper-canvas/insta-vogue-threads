@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import ApperIcon from '@/components/ApperIcon';
 import Button from '@/components/atoms/Button';
@@ -15,11 +16,23 @@ function Wishlist() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    loadWishlist();
-  }, []);
+const { user } = useSelector((state) => state.user);
 
-  const loadWishlist = async () => {
+  useEffect(() => {
+    if (user) {
+      loadWishlist();
+    } else {
+      // Redirect non-authenticated users to login
+      navigate('/login?redirect=' + encodeURIComponent('/wishlist'));
+    }
+  }, [user, navigate]);
+
+const loadWishlist = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       const wishlistIds = await wishlistService.getAll();
@@ -29,7 +42,7 @@ function Wishlist() {
         setProducts([]);
         setLoading(false);
         return;
-}
+      }
 
       const productsResponse = await productsService.getAll();
       if (!productsResponse.success) {
@@ -49,7 +62,9 @@ function Wishlist() {
     }
   };
 
-  const handleRemoveFromWishlist = async (productId) => {
+const handleRemoveFromWishlist = async (productId) => {
+    if (!user) return;
+    
     try {
       await wishlistService.remove(productId);
       setWishlistItems(prev => prev.filter(id => id !== productId));
@@ -63,6 +78,10 @@ function Wishlist() {
 const handleViewProduct = (productId) => {
     navigate(`/product/${productId}`);
   };
+
+if (!user) {
+    return null; // Component will redirect to login
+  }
 
   if (loading) {
     return <Loading />;

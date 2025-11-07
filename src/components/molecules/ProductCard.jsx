@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { wishlistService } from "@/services/api/wishlistService";
 import ApperIcon from "@/components/ApperIcon";
@@ -12,11 +13,20 @@ const ProductCard = ({ product, onAddToCart, className = "" }) => {
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
 
-  useEffect(() => {
-    checkWishlistStatus();
-  }, [product.Id]);
+const { user } = useSelector((state) => state.user);
 
-  const checkWishlistStatus = async () => {
+  useEffect(() => {
+    if (user) {
+      checkWishlistStatus();
+    }
+  }, [product.Id, user]);
+
+const checkWishlistStatus = async () => {
+    if (!user) {
+      setIsInWishlist(false);
+      return;
+    }
+    
     try {
       const inWishlist = await wishlistService.isInWishlist(product.Id);
       setIsInWishlist(inWishlist);
@@ -34,9 +44,9 @@ const ProductCard = ({ product, onAddToCart, className = "" }) => {
     onAddToCart(product);
   };
 
-  const handleWishlistToggle = async (e) => {
+const handleWishlistToggle = async (e) => {
     e.stopPropagation();
-    if (wishlistLoading) return;
+    if (wishlistLoading || !user) return;
 
     setWishlistLoading(true);
     try {
@@ -83,22 +93,24 @@ const ProductCard = ({ product, onAddToCart, className = "" }) => {
         )}
 
         {/* Wishlist button */}
-        <button
-          onClick={handleWishlistToggle}
-          disabled={wishlistLoading}
-          className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all duration-200 disabled:opacity-50"
-        >
-          <ApperIcon 
-            name="Heart" 
-            size={18} 
-            className={cn(
-              "transition-colors duration-200",
-              isInWishlist 
-                ? "text-red-500 fill-red-500" 
-                : "text-gray-600 hover:text-red-500"
-            )} 
-          />
-        </button>
+{user && (
+          <button
+            onClick={handleWishlistToggle}
+            disabled={wishlistLoading}
+            className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all duration-200 disabled:opacity-50"
+          >
+            <ApperIcon 
+              name="Heart" 
+              size={18} 
+              className={cn(
+                "transition-colors duration-200",
+                isInWishlist 
+                  ? "text-red-500 fill-red-500" 
+                  : "text-gray-600 hover:text-red-500"
+              )} 
+            />
+          </button>
+        )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         

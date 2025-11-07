@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { wishlistService } from "@/services/api/wishlistService";
 import productsService from "@/services/api/productsService";
 import cartService from "@/services/api/cartService";
@@ -16,13 +17,22 @@ const Header = ({ onCartClick }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
+const { user } = useSelector((state) => state.user);
+
   useEffect(() => {
     loadCartCount();
-    loadWishlistCount();
+    if (user) {
+      loadWishlistCount();
+    }
     loadCategories();
-  }, []);
+  }, [user]);
 
-  const loadWishlistCount = async () => {
+const loadWishlistCount = async () => {
+    if (!user) {
+      setWishlistCount(0);
+      return;
+    }
+    
     try {
       const count = await wishlistService.getCount();
       setWishlistCount(count);
