@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { wishlistService } from "@/services/api/wishlistService";
 import { toast } from "react-toastify";
 import productsService from "@/services/api/productsService";
@@ -14,6 +15,7 @@ import Error from "@/components/ui/Error";
 import Loading from "@/components/ui/Loading";
 import { cn } from "@/utils/cn";
 const ProductDetail = () => {
+  const { user } = useSelector((state) => state.user);
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
@@ -39,8 +41,8 @@ useEffect(() => {
     }
   }, [product]);
 
-  const checkWishlistStatus = async () => {
-    if (!product) return;
+const checkWishlistStatus = async () => {
+    if (!product || !user) return;
     try {
       const inWishlist = await wishlistService.isInWishlist(product.Id);
       setIsInWishlist(inWishlist);
@@ -79,8 +81,8 @@ const loadRelatedProducts = async () => {
     }
   };
 
-  const handleWishlistToggle = async () => {
-    if (!product || wishlistLoading) return;
+const handleWishlistToggle = async () => {
+    if (!product || wishlistLoading || !user) return;
 
     setWishlistLoading(true);
     try {
